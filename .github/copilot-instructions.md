@@ -8,6 +8,7 @@
 - Tests belong in `tests/` and should import the installed package as `tools`.
 - Put one-off developer utilities in `scripts/`.
 - Keep build artifacts such as `dist/`, `build/`, and `*.egg-info/` out of commits unless the repository explicitly tracks them.
+- Be explicitly aware that GEMINI.md is a symbolic link to .github/copilot-instructions.md
 
 ## Python Development
 
@@ -22,6 +23,8 @@
 ## Validation
 
 - Run Python tests with `.venv/bin/python -m unittest discover -s tests -v`.
+- For Python code changes, run the same analysis stack used by VS Code before finishing:
+  inspect Pylance diagnostics in the editor and run `.venv/bin/python -m pylint src tests`.
 - When changing packaging metadata, build the distribution from the repository root with:
   `.venv/bin/python -m build`.
 - Inspect the generated wheel and source archive when packaging changes affect included files or entry points.
@@ -39,7 +42,7 @@
 ## Dependencies
 
 - Prefer well-established, maintained packages when a dependency is genuinely needed.
-- Add every new dependency to the appropriate section of `python/pyproject.toml` and install it in `.venv` before validating.
+- Add every new dependency to the appropriate section of `pyproject.toml` and install it in `.venv` before validating.
 - Avoid introducing a dependency for functionality that is small and clear to implement with the standard library.
 
 ## Documentation

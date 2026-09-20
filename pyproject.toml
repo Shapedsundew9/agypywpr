@@ -13,6 +13,7 @@ dependencies = []
 [project.optional-dependencies]
 dev = [
     "pytest>=8",
+    "pylint>=3",
     "build>=1.2",
 ]
 
