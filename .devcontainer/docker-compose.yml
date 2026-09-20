@@ -20,6 +20,8 @@ services:
       NEO4J_DATABASE: ${NEO4J_DATABASE:-neo4j}
       HF_READ_TOKEN: ${HF_READ_TOKEN:-}
       ANTIGRAVITY_MIC: ${ANTIGRAVITY_MIC:-10.254.100.1:4713}
+      PYPI_USERNAME: ${PYPI_USERNAME:-}
+      PYPI_TOKEN: ${PYPI_TOKEN:-}
 
   neo4j:
     image: neo4j:community

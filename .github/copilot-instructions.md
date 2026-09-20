@@ -13,6 +13,7 @@
 - Use `.venv/bin/python`; the devcontainer installs `python/` as an editable package.
 - Import reusable code as `tools`.
 - Declare Python package dependencies in `python/pyproject.toml`.
+- Pypi access is available through `PYPI_USERNAME` and `PYPI_TOKEN` environment variables.
 
 ## Services And Secrets
 
