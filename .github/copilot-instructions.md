@@ -23,8 +23,6 @@
 ## Validation
 
 - Run Python tests with `.venv/bin/python -m unittest discover -s tests -v`.
-- For Python code changes, run the same analysis stack used by VS Code before finishing:
-  inspect Pylance diagnostics in the editor and run `.venv/bin/python -m pylint src tests`.
 - When changing packaging metadata, build the distribution from the repository root with:
   `.venv/bin/python -m build`.
 - Inspect the generated wheel and source archive when packaging changes affect included files or entry points.
@@ -48,4 +46,3 @@
 ## Documentation
 
 - Keep `README.md` aligned with the install, usage, development, and publishing workflows.
-- Always run `markdownlint-cli2 --fix "**/*.md"` followed by `markdownlint-cli2 "**/*.md"` after Markdown changes.

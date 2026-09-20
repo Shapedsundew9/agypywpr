@@ -1,0 +1,11 @@
+{
+    "agypywpr-stop-signal": {
+        "Stop": [
+            {
+                "type": "command",
+                "command": ".venv/bin/python scripts/agy_stop_signal_hook.py",
+                "timeout": 5
+            }
+        ]
+    }
+}
