@@ -42,7 +42,14 @@ class SettingsTransaction:
             settings = json.loads(self._original or b"{}")
             updated = augment_permissions(settings, self.additions)
             self.journal_path.write_text(
-                json.dumps({"existed": existed, "original": self._original.decode("utf-8") if self._original else None}),
+                json.dumps(
+                    {
+                        "existed": existed,
+                        "original": (
+                            self._original.decode("utf-8") if self._original else None
+                        ),
+                    }
+                ),
                 encoding="utf-8",
             )
             self.journal_path.chmod(0o600)
@@ -66,9 +73,9 @@ class SettingsTransaction:
 
     def restore(self) -> None:
         """Restore the exact bytes present before the transaction."""
-        if self.path.exists() and self._temporary is not None:
-            current = self.path.read_bytes()
-            if current != self._temporary:
+        if self._temporary is not None:
+            current = self.path.read_bytes() if self.path.exists() else None
+            if current not in (self._temporary, self._original):
                 raise SettingsError(
                     "settings changed during the run; use agypywpr restore after review"
                 )
@@ -86,7 +93,9 @@ class SettingsTransaction:
 
     def _atomic_write_bytes(self, payload: bytes) -> None:
         mode = self.path.stat().st_mode & 0o777 if self.path.exists() else 0o600
-        descriptor, temporary = tempfile.mkstemp(dir=self.path.parent, prefix=f".{self.path.name}.")
+        descriptor, temporary = tempfile.mkstemp(
+            dir=self.path.parent, prefix=f".{self.path.name}."
+        )
         try:
             os.fchmod(descriptor, mode)
             with os.fdopen(descriptor, "wb") as stream:
@@ -125,7 +134,9 @@ def restore_from_journal(path: Path) -> None:
             raise SettingsError("recovery journal does not contain original settings")
         payload = original.encode("utf-8")
         mode = path.stat().st_mode & 0o777 if path.exists() else 0o600
-        descriptor, temporary = tempfile.mkstemp(dir=path.parent, prefix=f".{path.name}.")
+        descriptor, temporary = tempfile.mkstemp(
+            dir=path.parent, prefix=f".{path.name}."
+        )
         try:
             os.fchmod(descriptor, mode)
             with os.fdopen(descriptor, "wb") as stream:

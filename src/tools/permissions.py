@@ -5,7 +5,6 @@ from __future__ import annotations
 from collections.abc import Mapping
 from typing import Any
 
-
 PERMISSION_CATEGORIES = ("allow", "deny", "ask")
 
 
@@ -32,12 +31,16 @@ def parse_permission_document(document: Any) -> dict[str, list[str]]:
         if not isinstance(values, list) or not all(
             isinstance(value, str) for value in values
         ):
-            raise PermissionConfigError(f"permissions.{category} must be a list of strings")
+            raise PermissionConfigError(
+                f"permissions.{category} must be a list of strings"
+            )
         result[category] = list(dict.fromkeys(values))
     return result
 
 
-def augment_permissions(settings: Mapping[str, Any], additions: Mapping[str, list[str]]) -> dict[str, Any]:
+def augment_permissions(
+    settings: Mapping[str, Any], additions: Mapping[str, list[str]]
+) -> dict[str, Any]:
     """Return settings with unique temporary rules appended to each category."""
     result = dict(settings)
     current = settings.get("permissions", {})
@@ -49,7 +52,9 @@ def augment_permissions(settings: Mapping[str, Any], additions: Mapping[str, lis
         if not isinstance(existing, list) or not all(
             isinstance(value, str) for value in existing
         ):
-            raise PermissionConfigError(f"settings.permissions.{category} must be a list of strings")
+            raise PermissionConfigError(
+                f"settings.permissions.{category} must be a list of strings"
+            )
         merged[category] = list(dict.fromkeys([*existing, *additions[category]]))
     result["permissions"] = merged
     return result

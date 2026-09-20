@@ -59,7 +59,10 @@ def _run(args: argparse.Namespace) -> int:
         )
     settings_path = DEFAULT_SETTINGS
     arguments = args.agy_arguments or []
-    with SettingsTransaction(settings_path, additions):
+    if any(additions.values()):
+        with SettingsTransaction(settings_path, additions):
+            result = run_agy(prompt, arguments, timeout=args.timeout)
+    else:
         result = run_agy(prompt, arguments, timeout=args.timeout)
     if result.timed_out:
         return 124

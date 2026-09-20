@@ -1,3 +1,5 @@
+"""Tests for Antigravity subprocess supervision."""
+
 import stat
 import tempfile
 import unittest
@@ -7,6 +9,8 @@ from tools.runner import run_agy
 
 
 class RunnerTests(unittest.TestCase):
+    """Verify subprocess handling and timeout behavior."""
+
     def _script(self, directory: str, body: str) -> Path:
         path = Path(directory) / "fake-agy"
         path.write_text(f"#!/bin/sh\n{body}\n", encoding="utf-8")
@@ -14,6 +18,7 @@ class RunnerTests(unittest.TestCase):
         return path
 
     def test_keeps_stdin_open_until_child_exits(self) -> None:
+        """Preserve standard input while the child process runs."""
         with tempfile.TemporaryDirectory() as directory:
             executable = self._script(
                 directory,
@@ -28,6 +33,7 @@ class RunnerTests(unittest.TestCase):
             self.assertFalse(result.timed_out)
 
     def test_timeout_stops_child(self) -> None:
+        """Stop the child process after the configured timeout."""
         with tempfile.TemporaryDirectory() as directory:
             executable = self._script(directory, "sleep 30")
             result = run_agy("prompt", [], executable=str(executable), timeout=0.1)
