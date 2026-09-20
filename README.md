@@ -15,13 +15,13 @@ python3 -m pip install agypywpr
 Run a prompt from a UTF-8 file:
 
 ```bash
-agypywpr run --prompt-file prompt.txt --permissions-file permissions.json
+agypywpr run prompt.txt --permissions-file permissions.json
 ```
 
 Arguments after `--` are passed to `agy`:
 
 ```bash
-agypywpr run --prompt-file prompt.txt -- --model gemini
+agypywpr run prompt.txt -- --model gemini
 ```
 
 The default timeout is 30 minutes. Use `--timeout SECONDS` to override it.

@@ -19,10 +19,21 @@ def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(prog="agypywpr")
     subparsers = parser.add_subparsers(dest="command", required=True)
     run_parser = subparsers.add_parser("run", help="run one Antigravity prompt")
-    run_parser.add_argument("--prompt-file", type=Path, required=True)
+    run_parser.add_argument(
+        "prompt_file",
+        type=Path,
+        nargs="?",
+        default=None,
+        help="path to prompt file",
+    )
+    run_parser.add_argument(
+        "--prompt-file",
+        dest="prompt_file_opt",
+        type=Path,
+        help=argparse.SUPPRESS,
+    )
     run_parser.add_argument("--permissions-file", type=Path)
     run_parser.add_argument("--timeout", type=float, default=1800)
-    run_parser.add_argument("--", dest="agy_arguments", nargs=argparse.REMAINDER)
     restore_parser = subparsers.add_parser(
         "restore", help="restore a pending settings transaction"
     )
@@ -32,8 +43,15 @@ def build_parser() -> argparse.ArgumentParser:
 
 def main(argv: list[str] | None = None) -> int:
     """Run the command-line interface."""
-    args = build_parser().parse_args(argv)
+    raw_args = list(sys.argv[1:] if argv is None else argv)
+    agy_arguments: list[str] = []
+    if "--" in raw_args:
+        index = raw_args.index("--")
+        agy_arguments = raw_args[index + 1 :]
+        raw_args = raw_args[:index]
     try:
+        args = build_parser().parse_args(raw_args)
+        args.agy_arguments = agy_arguments
         if args.command == "restore":
             restore_from_journal(args.settings_path.expanduser())
             return 0
@@ -51,7 +69,10 @@ def main(argv: list[str] | None = None) -> int:
 
 def _run(args: argparse.Namespace) -> int:
     """Run an Antigravity prompt with optional temporary permissions."""
-    prompt = args.prompt_file.read_text(encoding="utf-8")
+    prompt_file = args.prompt_file or getattr(args, "prompt_file_opt", None)
+    if prompt_file is None:
+        raise ValueError("a prompt file is required for the run command")
+    prompt = prompt_file.read_text(encoding="utf-8")
     additions = {"allow": [], "deny": [], "ask": []}
     if args.permissions_file is not None:
         additions = parse_permission_document(

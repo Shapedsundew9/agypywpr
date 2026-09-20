@@ -116,6 +116,7 @@ def _run_turn(
         return True
     conversation_id = None
     grace_deadline = None
+    streamed_length = 0
     buffer = bytearray()
     with selectors.DefaultSelector() as selector:
         assert process.stdout is not None
@@ -134,29 +135,44 @@ def _run_turn(
             if not data:
                 return True
             buffer.extend(data)
-            conversation_id, grace_deadline = _consume_lines(
-                buffer, conversation_id, grace_deadline
+            conversation_id, grace_deadline, streamed_length = _consume_lines(
+                buffer, conversation_id, grace_deadline, streamed_length
             )
 
 
 def _consume_lines(
-    buffer: bytearray, conversation_id: str | None, grace_deadline: float | None
-) -> tuple[str | None, float | None]:
-    """Parse complete NDJSON lines, tracking the conversation id and result arrival."""
+    buffer: bytearray,
+    conversation_id: str | None,
+    grace_deadline: float | None,
+    streamed_length: int = 0,
+) -> tuple[str | None, float | None, int]:
+    """Parse complete NDJSON lines, streaming deltas and tracking result arrival."""
     while b"\n" in buffer:
         line, _, rest = buffer.partition(b"\n")
         buffer[:] = rest
         try:
             event = json.loads(line)
-        except json.JSONDecodeError, UnicodeDecodeError:
+        except (json.JSONDecodeError, UnicodeDecodeError):
             continue
         if event.get("event") == "init":
             conversation_id = event.get("conversation_id")
+        elif event.get("event") == "step_update":
+            step_update = event.get("step_update", {})
+            delta = step_update.get("text_delta")
+            if delta:
+                sys.stdout.write(delta)
+                sys.stdout.flush()
+                streamed_length += len(delta)
         elif event.get("event") == "result" and grace_deadline is None:
-            sys.stdout.write(event.get("result", {}).get("response", ""))
-            sys.stdout.flush()
+            response = event.get("result", {}).get("response", "")
+            if streamed_length == 0:
+                sys.stdout.write(response)
+                sys.stdout.flush()
+            elif len(response) > streamed_length:
+                sys.stdout.write(response[streamed_length:])
+                sys.stdout.flush()
             grace_deadline = time.monotonic() + FULLY_IDLE_GRACE_SECONDS
-    return conversation_id, grace_deadline
+    return conversation_id, grace_deadline, streamed_length
 
 
 def _fully_idle_or_ungoverned(
