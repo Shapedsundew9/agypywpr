@@ -1,1 +1,1 @@
-Invoke a subagent to simply wait for 1 minute doing nothing and then return, and then tell me its done. This is a test of control functionality & I do not want to burn tokens.
+Invoke a subagent to simply wait for 20 seconds doing nothing and then return, then invoke another to wait for 20 seconds and then return, and then tell me its done. This is a test of control functionality & I do not want to burn tokens.
