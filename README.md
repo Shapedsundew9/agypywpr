@@ -1,7 +1,8 @@
 # agypywpr
 
 `agypywpr` runs a one-shot Google Antigravity CLI task with temporary permission
-rules. It backs up `~/.gemini/antigravity-cli/settings.json`, augments the
+rules that waits for all subagents to complete before exiting.
+It backs up `~/.gemini/antigravity-cli/settings.json`, augments the
 permission lists, runs `agy`, and restores the original settings afterward.
 
 ## Installation
