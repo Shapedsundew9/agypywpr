@@ -1,0 +1,7 @@
+{
+    "noProgress": true,
+    "gitignore": true,
+    "config": {
+        "MD013": false
+    }
+}

@@ -1,0 +1,67 @@
+services:
+  app:
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    build:
+      context: .
+      dockerfile: Dockerfile
+      pull: true
+    volumes:
+      - ..:/workspace:cached
+    command: sleep infinity
+    environment:
+      GITHUB_TOKEN: ${COPILOT_GITHUB_TOKEN:-}
+      GEMINI_API_KEY: ${GEMINI_API_KEY:-}
+      ARC_AGI_API: ${ARC_AGI_API:-}
+      DATABASE_URL: ${DATABASE_URL:-postgresql://postgres:postgres@postgres:5432/postgres}
+      NEO4J_URI: ${NEO4J_URI:-bolt://neo4j:7687}
+      NEO4J_USERNAME: ${NEO4J_USERNAME:-neo4j}
+      NEO4J_PASSWORD: ${NEO4J_PASSWORD:-password}
+      NEO4J_DATABASE: ${NEO4J_DATABASE:-neo4j}
+      HF_READ_TOKEN: ${HF_READ_TOKEN:-}
+      ANTIGRAVITY_MIC: ${ANTIGRAVITY_MIC:-10.254.100.1:4713}
+
+  neo4j:
+    image: neo4j:community
+    pull_policy: always
+    volumes:
+      - neo4j_data:/data
+      - neo4j_logs:/logs
+    environment:
+      NEO4J_AUTH: neo4j/password
+      NEO4J_PLUGINS: '["apoc"]'
+    ports:
+      - "7474:7474"
+      - "7687:7687"
+
+  postgres:
+    image: postgres:18
+    pull_policy: always
+    shm_size: 128mb
+    volumes:
+      - postgres_data:/var/lib/postgresql
+    environment:
+      POSTGRES_DB: postgres
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U postgres -d postgres" ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    ports:
+      - "5432:5432"
+
+volumes:
+  neo4j_data:
+  neo4j_logs:
+  postgres_data:
+
+networks:
+  default:
+    name: devcontainer_default
+    ipam:
+      driver: default
+      config:
+        - subnet: 10.254.100.0/24
+          gateway: 10.254.100.1
