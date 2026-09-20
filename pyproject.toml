@@ -3,20 +3,21 @@ requires = ["setuptools>=68", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "Python-Base"
+name = "agypywpr"
 version = "0.1.0"
-description = "Python-Base"
+description = "Run Antigravity CLI tasks with temporary permission augmentation."
+readme = "README.md"
 requires-python = ">=3.14"
-dependencies = [
-]
+dependencies = []
 
 [project.optional-dependencies]
 dev = [
-    "pytest",
+    "pytest>=8",
+    "build>=1.2",
 ]
 
 [project.scripts]
-protoproject = "cli:main"
+agypywpr = "tools.cli:main"
 
 [tool.setuptools]
 package-dir = {"" = "src"}
@@ -24,5 +25,5 @@ package-dir = {"" = "src"}
 [tool.setuptools.packages.find]
 where = ["src"]
 
-[tool.pylint.basic]
-no-docstring-rgx = "^(_|test_.*|setUp|tearDown|setUpClass|tearDownClass|Test.*|.*Tests)$"
+[tool.pytest.ini_options]
+testpaths = ["tests"]

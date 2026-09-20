@@ -1,10 +1,10 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
-# This script runs after the container is created.
-# The 'set -e' command ensures that the script will exit immediately if a command fails.
-set -e
+set -euo pipefail
 
-# Activating the virtual environment
+npm install --global markdownlint-cli2@latest
+markdownlint-cli2 --version
+
 echo "Creating virtual environment..."
 if [ ! -d ".venv" ]; then
     python3 -m venv .venv

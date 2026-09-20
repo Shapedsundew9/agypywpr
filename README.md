@@ -1,77 +1,77 @@
-# Python Template
+# agypywpr
 
-A lightweight Python project template for building small CLI-based applications and package-friendly code.
+`agypywpr` runs a one-shot Google Antigravity CLI task with temporary permission
+rules. It backs up `~/.gemini/antigravity-cli/settings.json`, augments the
+permission lists, runs `agy`, and restores the original settings afterward.
 
-## Overview
+## Installation
 
-This repository provides a minimal starting point with:
-
-- a Python package layout under `src/`
-- a simple CLI entry point in `src/cli.py`
-- project metadata in `pyproject.toml`
-- a docs folder for project notes and guidance
-
-## Project Structure
-
-```text
-.
-├── .devcontainer/
-├── .github/
-├── docs/
-├── src/
-│   └── cli.py
-├── .gitignore
-├── .markdownlint-cli2.jsonc
-├── GEMINI.md
-├── LICENSE
-├── pyproject.toml
-├── README.md
-└── .venv/
-```
-
-## Getting Started
-
-1. Create or activate the project virtual environment.
-2. Install the project in editable mode:
+Antigravity CLI must already be installed and authenticated as `agy`.
 
 ```bash
-python -m pip install -e .
+python3 -m pip install agypywpr
 ```
 
-1. Run the CLI:
+Run a prompt from a UTF-8 file:
 
 ```bash
-protoproject
+agypywpr run --prompt-file prompt.txt --permissions-file permissions.json
 ```
 
-This currently prints:
+Arguments after `--` are passed to `agy`:
 
-```text
-Hello World!
+```bash
+agypywpr run --prompt-file prompt.txt -- --model gemini
 ```
+
+The default timeout is 30 minutes. Use `--timeout SECONDS` to override it.
+
+## Permission file
+
+The permission file contains an additive fragment. Existing settings are not
+replaced.
+
+```json
+{
+  "permissions": {
+    "allow": ["command(git)", "write_file(src/)"],
+    "deny": ["command(sudo)"],
+    "ask": ["command(*)"]
+  }
+}
+```
+
+Rules are deduplicated within each list. Antigravity evaluates conflicting
+rules using its documented precedence: deny, then ask, then allow.
+
+## Recovery
+
+The wrapper uses a lock, a mode-`0600` recovery journal, and atomic settings
+writes. If the process is forcibly killed, inspect the settings and run:
+
+```bash
+agypywpr restore
+```
+
+The current release targets Linux and macOS. The completion behavior for
+background Antigravity subagents is under compatibility testing because AGY's
+headless completion protocol is not documented.
 
 ## Development
 
-You can extend the template by adding modules under `src/` and updating the package configuration in `pyproject.toml`.
-
-### Example
-
-```python
-from cli import main
+```bash
+.venv/bin/python -m pip install --editable '.[dev]'
+.venv/bin/python -m unittest discover -s tests -v
 ```
 
-## Scripts and Tools
+Build the wheel and source distribution from the repository root:
 
-The project is configured with a console script entry point:
+```bash
+.venv/bin/python -m build
+```
 
-- `protoproject` -> `cli:main`
+## Publishing
 
-This makes it easy to expose a CLI command without adding custom boilerplate.
-
-## License
-
-This project is licensed under the MIT License. See [LICENSE](LICENSE) for details.
-
-## Notes
-
-This is intentionally a simple starter repository. It is designed to be easy to customize for your own Python tools, scripts, or command-line apps.
+Releases are published from GitHub through PyPI Trusted Publishing (OIDC).
+Configure a protected `pypi` GitHub Environment and register the repository's
+pending Trusted Publisher on PyPI before creating a release tag.

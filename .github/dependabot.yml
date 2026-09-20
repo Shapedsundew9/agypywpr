@@ -17,3 +17,13 @@ updates:
       devcontainer-dependencies:
         patterns:
           - "*"
+
+  - package-ecosystem: pip
+    directory: /python
+    schedule:
+      interval: weekly
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly

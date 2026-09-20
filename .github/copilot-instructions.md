@@ -1,46 +1,48 @@
 # Project Guidelines
 
-## Layout
+## Repository Layout
 
-- This is a mixed Rust and Python workspace.
-- Put reusable Python code in `python/src/tools/`.
-- Put Python tests in `python/tests/`.
-- Put one-off Python programs in `python/scripts/`.
-- Do not mix Python files into the Rust `src/` or `tests/` directories.
+- This is a Python-only package repository.
+- The package project is configured by the repository-root `pyproject.toml`.
+- Use the `src` layout: reusable package code belongs in `src/tools/`.
+- Tests belong in `tests/` and should import the installed package as `tools`.
+- Put one-off developer utilities in `scripts/`.
+- Keep build artifacts such as `dist/`, `build/`, and `*.egg-info/` out of commits unless the repository explicitly tracks them.
 
-## Python
+## Python Development
 
-- Use `.venv/bin/python`; the devcontainer installs `python/` as an editable package.
-- Import reusable code as `tools`.
-- Declare Python package dependencies in `python/pyproject.toml`.
-- Pypi access is available through `PYPI_USERNAME` and `PYPI_TOKEN` environment variables.
-
-## Services And Secrets
-
-- PostgreSQL and Neo4j are available through Docker Compose but are not started by default.
-- Read credentials and tokens from the existing environment variables.
-- The environment variables may direct to a remote service. Do not assume a docker or local service is running.
-- Never hard-code, print, or commit secret values.
-- Relevant variables include `DATABASE_URL`, `NEO4J_URI`,
-  `NEO4J_USERNAME`, `NEO4J_PASSWORD`, `NEO4J_DATABASE`,
-  `GEMINI_API_KEY`, `ARC_AGI_API`, and `HF_READ_TOKEN`.
+- Use the repository virtual environment at `.venv/` and its interpreter, `.venv/bin/python`.
+- Install the project and development dependencies from the repository root with:
+  `.venv/bin/python -m pip install --editable '.[dev]'`.
+- Declare runtime and development dependencies in `pyproject.toml`; do not add ad hoc requirements files.
+- Keep the supported Python version and package metadata in `pyproject.toml` accurate.
+- Follow existing code style and public APIs. Avoid unrelated refactors.
+- Never hard-code, print, or commit credentials, API keys, tokens, or other secrets.
 
 ## Validation
 
-- Run `cargo fmt --check`, `cargo clippy`, and `cargo test` for Rust changes.
-- Run `.venv/bin/python -m unittest discover -s python/tests -v` for Python changes.
-- Keep intentional Markdown exceptions narrow and document them with a targeted configuration or inline suppression.
-- Validate only the services and language surfaces affected by an experiment.
+- Run Python tests with `.venv/bin/python -m unittest discover -s tests -v`.
+- When changing packaging metadata, build the distribution from the repository root with:
+  `.venv/bin/python -m build`.
+- Inspect the generated wheel and source archive when packaging changes affect included files or entry points.
+- Run focused checks for the files and behavior changed before running broader validation.
+- Keep intentional Markdown exceptions narrow and document them with targeted configuration or inline suppression.
 
-## 3rd Party Packages
+## PyPI Publishing
 
-- Agents are explicitly authorized to install any pip packages or Rust crates needed to implement functionality efficiently that meet the criteria below.
-  - Well-established, high-quality, maintained packages (e.g., `numpy`, `scipy`, `rand`, `serde`) that are fully supported.
-  - Always declare added dependencies in the appropriate project file:
-    - Python: declare in `python/pyproject.toml` and install into `.venv` (`.venv/bin/pip install <pkg>`).
-    - Rust: declare in `Cargo.toml` or add via `cargo add <crate>`.
-- Do not pull in obscure, single-maintainer, or redundant packages if the task is trivial in-house.
+- Build distributions from the repository root; never publish directly from a working tree.
+- Verify package metadata and archives before release. Use `twine check` when Twine is available.
+- Publish through the repository's configured CI release workflow and PyPI Trusted Publishing where possible.
+- Never place PyPI credentials in source files, configuration committed to the repository, command history, or logs.
+- Do not change the package name, version, supported Python range, or console entry points without checking the release impact.
 
-## Finally
+## Dependencies
 
-- Always run `markdownlint-cli2 --fix "**/*.md"` followed by `markdownlint-cli2 "**/*.md"` to ensure there are no remaining formatting issues.
+- Prefer well-established, maintained packages when a dependency is genuinely needed.
+- Add every new dependency to the appropriate section of `python/pyproject.toml` and install it in `.venv` before validating.
+- Avoid introducing a dependency for functionality that is small and clear to implement with the standard library.
+
+## Documentation
+
+- Keep `README.md` aligned with the install, usage, development, and publishing workflows.
+- Always run `markdownlint-cli2 --fix "**/*.md"` followed by `markdownlint-cli2 "**/*.md"` after Markdown changes.
